@@ -1,6 +1,6 @@
 # heart-failure-classifier
 
-An end-to-end machine learning pipeline built in python using SparkML
+An end-to-end machine learning pipeline built in python using SparkML designed to classify heart failure based on a list of features
 
 ## Run Locally
 
