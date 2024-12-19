@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.ml import Pipeline
 from pyspark.ml.feature import StringIndexer, VectorAssembler, StandardScaler
-from pyspark.ml.classification import LogisticRegression
+from pyspark.ml.classification import LogisticRegression, DecisionTreeClassifier, RandomForestClassifier, GBTClassifier
 from pyspark.ml.evaluation import BinaryClassificationEvaluator
 
 #Initialize Spark Session
@@ -31,10 +31,10 @@ assembler = VectorAssembler(
 scaler = StandardScaler(inputCol = "features", outputCol = "scaledFeatures", withStd = True, withMean = False)
 
 #Logistic Regression Model
-lr = LogisticRegression(featuresCol = "scaledFeatures", labelCol = "HeartDisease")
+ml = GBTClassifier(featuresCol = "scaledFeatures", labelCol = "HeartDisease")
 
 # Creating pipline
-pipeline = Pipeline(stages=indexers + [assembler, scaler, lr])
+pipeline = Pipeline(stages=indexers + [assembler, scaler, ml])
 
 #Split the data
 train_data, test_data = data.randomSplit([0.8, 0.2], seed = 42)
