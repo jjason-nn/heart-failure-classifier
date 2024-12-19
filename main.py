@@ -31,7 +31,7 @@ assembler = VectorAssembler(
 scaler = StandardScaler(inputCol = "features", outputCol = "scaledFeatures", withStd = True, withMean = False)
 
 #Logistic Regression Model
-ml = GBTClassifier(featuresCol = "scaledFeatures", labelCol = "HeartDisease")
+ml = RandomForestClassifier(featuresCol = "scaledFeatures", labelCol = "HeartDisease")
 
 # Creating pipline
 pipeline = Pipeline(stages=indexers + [assembler, scaler, ml])
