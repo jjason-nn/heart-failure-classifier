@@ -6,13 +6,6 @@ from pyspark.ml.evaluation import BinaryClassificationEvaluator
 from pyspark.ml import Transformer
 from pyspark.ml.param import Param, Params
 
-# Custom Transformer class to drop rows with NaN values
-class NaNDroppingTransformer(Transformer):
-    def __init__(self):
-        super(NaNDroppingTransformer, self).__init__()
-    
-    def _transform(self, dataset):
-        return dataset.na.drop()
 
 # Initialize Spark Session
 spark = SparkSession.builder.appName("Heart Failure Classifier").getOrCreate()
@@ -21,12 +14,21 @@ spark = SparkSession.builder.appName("Heart Failure Classifier").getOrCreate()
 data = spark.read.csv("heart.csv", inferSchema=True, header=True)
 
 # ================================================================ Data Preprocessing ================================================================
+# Custom Transformer class to drop rows with NaN values
+class NaNDroppingTransformer(Transformer):
+    def __init__(self):
+        super(NaNDroppingTransformer, self).__init__()
+    
+    def _transform(self, dataset):
+        return dataset.na.drop()
 
 # Data pipeline
 categorical_cols = ["Sex","ChestPainType","RestingECG", "ExerciseAngina", "ST_Slope"]
 
 # Transforming Categorical Columns to Numerical
 indexers = [StringIndexer(inputCol=col, outputCol=col + "_index") for col in categorical_cols]
+
+# ================================================================ Feature Engineering ================================================================
 
 #Assemble features into a single vector
 assembler = VectorAssembler(
@@ -38,12 +40,11 @@ assembler = VectorAssembler(
                  "Oldpeak"] + [col +"_index" for col in categorical_cols[:-1]],
     outputCol = "features"
 )
+# Scale the features
 scaler = StandardScaler(inputCol = "features", outputCol = "scaledFeatures", withStd = True, withMean = False)
 
-# ================================================================ Feature Engineering ================================================================
 
-# Scale the features
-
+# ================================================================ Model Training ================================================================
 # Random Forest Classifier Model
 ml = RandomForestClassifier(featuresCol = "scaledFeatures", labelCol = "HeartDisease")
 
@@ -52,8 +53,6 @@ pipeline = Pipeline(stages = [NaNDroppingTransformer()] + indexers + [assembler,
 
 # Split the data  80% for training and 20% for testing 
 train_data, test_data = data.randomSplit([0.8, 0.2], seed = 42)
-
-# ================================================================ Model Training ================================================================
 
 # Train the model
 model = pipeline.fit(train_data)
